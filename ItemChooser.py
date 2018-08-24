@@ -309,6 +309,33 @@ class ItemChooser():
 
             cursor.close()
     
+    def remove_item(self, table_name, item_name):
+        # try if the table exists <=> is contained in self._TABLE_NAMES_LIST
+        try:
+            self.check_table_name_validity(table_name)
+        except TableNameException as e:
+            raise e
+        else:
+            cursor = self.db.cursor()
+
+            remove_item = 'DELETE FROM {} WHERE name = %s'.format(table_name)
+
+            try:
+                cursor.execute(remove_item, item_name)
+                if cursor.rowcount == 0:
+                    raise DatabaseException(
+                        'No item called "{}".'.format(item_name))
+                self.db.commit()
+            except DatabaseException as e:
+                self.db.rollback()
+                raise e
+            except:
+                self.db.rollback()
+                raise DatabaseException('Item couldn\'t be removed.')
+
+            cursor.close()
+
+
     def random_choice(self, dataframe):
         """Chooses a random item in the dataframe.
         

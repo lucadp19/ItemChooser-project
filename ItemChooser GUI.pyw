@@ -9,8 +9,9 @@ import ICAnalyzer
 
 from Msg import Msg
 from TableWindows import AddTableWindow, RemoveTableWindow
-from ItemsWindows import (InsertNewItemWindow, ChooseItemWindow, 
-                         UpdateDateWindow, UpdatePriorityWindow)
+from ItemsWindows import InsertNewItemWindow, RemoveItemWindow
+from UpdatingWindows import (ChooseItemWindow, UpdateDateWindow, 
+                             UpdatePriorityWindow)
 from PrintingWindows import GenerateTableWindow, DataAnalysisWindow
 
 # default login file
@@ -22,9 +23,10 @@ main_window_button_text = {
     'Insert new table': 'insert_new_table',
     'Remove a table': 'remove_table',
     'Insert new item': 'insert_new_item',
-    'Choose a item': 'choose_item',
-    'Update a item (date)': 'update_item_date',
-    'Update a item (priority)': 'update_priority',
+    'Remove an item': 'remove_item',
+    'Choose an item': 'choose_item',
+    'Update an item (date)': 'update_item_date',
+    'Update an item (priority)': 'update_priority',
     'Print all the items': 'print_tables',
     'Run the data-analysis app': 'data_analysis',
     'Exit the application': 'exit_app'
@@ -349,6 +351,20 @@ class Window(QtWidgets.QWidget):
 
         # When the function is being closed, it calls resetView
         newItem.destroyed.connect(self.resetView)
+
+    def button_remove_item(self):
+        """Function to remove an item."""
+        removeItem = RemoveItemWindow(self.ic_db)
+        self.nextLayout = removeItem
+
+        # Changes the layout
+        self.changeLayouts()
+
+        self.resize(570, 300)
+        self.box_layout.addWidget(removeItem)
+
+        # When the function is being closed, it calls resetView
+        removeItem.destroyed.connect(self.resetView)
 
     def button_choose_item(self):
         """Function to choose a random item."""

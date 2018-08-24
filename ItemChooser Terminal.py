@@ -5,6 +5,19 @@ import ItemChooser
 
 login_file = 'login_data.txt'
 
+choices_text = {
+    0: ('Insert new table', 'insert_new_table'),
+    1: ('Remove a table', 'remove_table'),
+    2: ('Insert new item', 'insert_new_item'),
+    3: ('Remove an item', 'remove_item'),
+    4: ('Choose an item', 'choose_item'),
+    5: ('Update a item (date)', 'update_item_date'),
+    6: ('Update an item (priority)', 'update_priority'),
+    7: ('Print all the items', 'print_tables'),
+    8: ('Run data-analysis tool', 'data_analysis'),
+    'E': ('Exit', 'exit_app'),
+}
+
 user = ItemChooser.username
 passw = ItemChooser.password
 db_name = ItemChooser.database_name
@@ -40,8 +53,17 @@ def main():
             except ItemChooser.DatabaseException as e:
                 print(str(e))
 
-        # Insert new item
+        # Remove a table
         elif choice == '1':
+            table_name = input(
+                '> Insert the name of the table to remove from the database:\n\t')
+            try:
+                ic_db.remove_table(table_name)
+            except ItemChooser.DatabaseException as e:
+                print(str(e))
+
+        # Insert new item
+        elif choice == '2':
             table_name = input('> Insert the name of the database table:\n\t')
             item_name = input('> Insert the name of the item:\n\t')
             item_priority = float(input('Insert the priority for the item, or else write 1:\n\t'))
@@ -54,8 +76,30 @@ def main():
             except ItemChooser.TableNameException as e:
                 print('ERROR!: ' + e.value)
 
+        # Remove an item
+        elif choice == '3':
+            table_name = input('> Insert the name of the database table:\n\t')
+            item_name = input('> Insert the name of the item:\n\t')
+
+            try:
+                item = ic_db.search_for_item(table_name, item_name)[0]
+                print('\n' + tabulate([list(item)], ['ITEM','DATE','PRIORITY']))
+            except ItemChooser.DatabaseException as e:
+                print(e)
+                continue
+            
+            yn = input('> Are you sure you want to delete this item? Y/N for yes/no:\n\t')
+            if yn in ('y', 'Y', 'yes'):
+                try:
+                    ic_db.remove_item(table_name, item_name)
+                    print('> Item removed!')
+                except Exception as e:
+                    print('ERROR!: ' + str(e))
+            elif yn in ('n', 'N', 'no'):
+                continue
+
         # Choose a random item
-        elif choice == '2':
+        elif choice == '4':
             table_name = input('> Insert the name of the database table:\n\t')
             try:
                 df = ic_db.get_dataframe(table_name)
@@ -81,7 +125,7 @@ def main():
                 print('ERROR!: ' + e.value)
 
         # Update the date of an item
-        elif choice == '3':
+        elif choice == '5':
             table_name = input('> Insert the name of the database table:\n\t')
             item_name = input('> Insert the name of the item:\n\t')
             try:
@@ -90,7 +134,7 @@ def main():
                 print('ERROR!: ' + e.value)
 
         # Update the priority of an item
-        elif choice == '4':
+        elif choice == '6':
             table_name = input('> Insert the name of the database table:\n\t')
             item_name = input('> Insert the name of the item:\n\t')
             item_priority = float(input('Insert the new priority for the item:\n\t'))
@@ -102,7 +146,7 @@ def main():
                 print('ERROR!: ' + str(e))
 
         # Print all the tables
-        elif choice == '5':
+        elif choice == '7':
             yn = input('> Do you want the output to be sorted by date? Y/N:\n\t')
             if yn in ('y', 'Y', 'yes'):
                 print('\n')
@@ -120,20 +164,12 @@ def main():
                         print(table + '\n')
 
         # Data Analysis
-        elif choice == '6':
+        elif choice == '8':
             analyzer = ICAnalyzer.ItemChooserAnalyzer(ic_db)
             rep_limit = int(input('> What is the repetition limit?\n\t'))
             table_name = input('> What is the table name?\n\t')
             print(analyzer.run(table_name, rep_limit=rep_limit, tabulate=False))
         
-        # Remove a table
-        elif choice == '7':
-            table_name = input(
-                '> Insert the name of the table to remove from the database:\n\t')
-            try:
-                ic_db.remove_table(table_name)
-            except ItemChooser.DatabaseException as e:
-                print(str(e))
 
         # Exit
         elif choice in ('e', 'E', 'exit'):
@@ -146,17 +182,7 @@ def main():
 
 def print_options():
     return tabulate(
-        [
-            [0, 'Insert new table'],
-            [1, 'Insert new value'],
-            [2, 'Choose a item'],
-            [3, 'Update a item (date)'],
-            [4, 'Update a item (priority)'],
-            [5, 'Print tables'],
-            [6, 'Run data-analysis tool'],
-            [7, 'Remove table'],
-            ['E', 'Exit'],
-        ],
+        [[key, value[0]] for key, value in choices_text.items()],
         ['N', 'Choices']
     )
 
